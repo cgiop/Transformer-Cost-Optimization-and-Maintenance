@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -44,6 +44,7 @@ const CircularProgress = ({ value, maxValue, label, subLabel, color, icon: Icon 
 
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showGraph, setShowGraph] = useState(false);
   const [file, setFile] = useState(null);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const [isTraining, setIsTraining] = useState(false);
@@ -100,11 +101,11 @@ function App() {
   };
 
   const handlePredict = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     try {
       const res = await axios.post('/predict_raw', predictionData);
       setPredictionResult(res.data);
-      showToast('Prediction complete');
+      if (e) showToast('Prediction complete');
       
       const newChartPoint = {
         name: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
@@ -118,9 +119,13 @@ function App() {
         ...prev
       ]);
     } catch (err) {
-      showToast(err.response?.data?.detail || 'Prediction failed', 'error');
+      if (e) showToast(err.response?.data?.detail || 'Prediction failed', 'error');
     }
   };
+
+  useEffect(() => {
+    handlePredict();
+  }, []);
 
   const handleInputChange = (e) => {
     setPredictionData(prev => ({
@@ -235,25 +240,27 @@ function App() {
           </div>
         )}
 
-        <div className="card chart-section">
-          <div className="flex-between">
-            <div className="flex-row" style={{ gap: '2rem' }}>
-              <div style={{ color: 'var(--danger)', fontSize: '0.9rem', fontWeight: 500 }}>■ Estimated Cost</div>
-              <div style={{ color: 'var(--primary-blue)', fontSize: '0.9rem', fontWeight: 500 }}>■ Expected Profit</div>
+        {showGraph && (
+          <div className="card chart-section">
+            <div className="flex-between">
+              <div className="flex-row" style={{ gap: '2rem' }}>
+                <div style={{ color: 'var(--danger)', fontSize: '0.9rem', fontWeight: 500 }}>■ Estimated Cost</div>
+                <div style={{ color: 'var(--primary-blue)', fontSize: '0.9rem', fontWeight: 500 }}>■ Expected Profit</div>
+              </div>
+            </div>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={false} stroke="var(--border-color)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
+                  <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)' }} />
+                  <Line type="monotone" dataKey="cost" stroke="var(--danger)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                  <Line type="monotone" dataKey="profit" stroke="var(--primary-blue)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={false} stroke="var(--border-color)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
-                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--text-primary)' }} />
-                <Line type="monotone" dataKey="cost" stroke="var(--danger)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                <Line type="monotone" dataKey="profit" stroke="var(--primary-blue)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        )}
 
         <div className="card">
           <div className="flex-between" style={{ marginBottom: '0.75rem' }}>
@@ -319,6 +326,15 @@ function App() {
               <div className="q-value-row"><span>Corrective:</span> <span style={{ fontWeight: 600 }}>{predictionResult.q_values[2].toFixed(4)}</span></div>
             </div>
           )}
+          <div className="sidebar-section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+            <label style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <BarChart3 size={20} color="var(--primary-cyan)"/> Advanced Settings
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '1rem', color: 'var(--text-primary)' }}>
+              <input type="checkbox" checked={showGraph} onChange={(e) => setShowGraph(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+              Show Trend Graph
+            </label>
+          </div>
         </aside>
       )}
 
