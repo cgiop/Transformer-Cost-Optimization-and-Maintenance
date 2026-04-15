@@ -1,24 +1,23 @@
-annotated-doc==0.0.4
-annotated-types==0.7.0
-anyio==4.13.0
-click==8.3.1
-colorama==0.4.6
-fastapi==0.135.2
-h11==0.16.0
-idna==3.11
-joblib==1.5.3
-numpy==2.4.3
-pandas==3.0.1
-pydantic==2.12.5
-pydantic_core==2.41.5
+# ---------------- Core Backend ----------------
+fastapi==0.110.0
+uvicorn==0.27.0
+pydantic==2.6.4
+python-multipart==0.0.9
+
+# ---------------- Data & ML ----------------
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.4.2
+scipy==1.11.4
+joblib==1.4.2
+
+# ---------------- Frontend ----------------
+streamlit==1.35.0
+requests==2.31.0
+
+# ---------------- Visualization ----------------
+matplotlib==3.8.4
+
+# ---------------- Utilities ----------------
 python-dateutil==2.9.0.post0
-python-multipart==0.0.22
-scikit-learn==1.8.0
-scipy==1.17.1
-six==1.17.0
-starlette==1.0.0
-threadpoolctl==3.6.0
-typing-inspection==0.4.2
-typing_extensions==4.15.0
-tzdata==2025.3
-uvicorn==0.42.0
+typing-extensions==4.10.0
